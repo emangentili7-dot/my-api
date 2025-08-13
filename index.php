@@ -1,18 +1,33 @@
 <?php
 header("Content-Type: application/json");
 
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    echo json_encode(["error" => "Only POST allowed"]);
+// Accept POST only
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Only POST allowed",
+        "method" => $_SERVER['REQUEST_METHOD']
+    ]);
     exit;
 }
 
-$data = json_decode(file_get_contents("php://input"), true);
+// Read JSON input
+$raw = file_get_contents("php://input");
+$data = json_decode($raw, true);
 
+// If empty or invalid, return error
 if (!$data) {
-    echo json_encode(["error" => "Invalid JSON"]);
+    echo json_encode([
+        "status" => "error",
+        "message" => "Invalid or empty JSON"
+    ]);
     exit;
 }
 
+// Optional: save to file
+file_put_contents("data.txt", date("Y-m-d H:i:s") . " " . print_r($data, true) . "\n", FILE_APPEND);
+
+// Return response
 echo json_encode([
     "status" => "success",
     "received" => $data
